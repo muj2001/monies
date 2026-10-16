@@ -1,6 +1,6 @@
 # Monies
 
-A personal ledger app built with Expo and React Native. This is a learning project for building a mobile frontend with Google Sheets as the planned data store.
+A personal ledger app built with Expo and React Native. This is a learning project for building a mobile frontend with Google Sheets as the planned data store for now.
 
 ## Current state
 
