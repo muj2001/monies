@@ -2,6 +2,16 @@
 
 A personal ledger app built with Expo and React Native. This is a learning project for building a mobile frontend with Google Sheets as the planned data store for now.
 
+## Tech Stack
+
+| Technology | Purpose | System role | Development status | Replaces |
+| --- | --- | --- | --- | --- |
+| React Native | Build the mobile interface | UI framework | In use | — |
+| Expo | Develop and build the app | App platform and tooling | In use | — |
+| Expo Router | Navigate between screens | Navigation | In use | — |
+| TypeScript | Check types during development | Programming language | In use | — |
+| Google Sheets | Store expense records | Data store | Integration in progress | — |
+
 ## Current state
 
 The app currently displays a refreshable sample list. An experimental Google Sheets hook exists, but the screen does not use it yet; you cannot record or view expenses in the app.
