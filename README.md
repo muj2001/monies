@@ -1,56 +1,65 @@
-# Welcome to your Expo app 👋
+# Monies
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A personal ledger app built with Expo and React Native. This is a learning project for building a mobile frontend with Google Sheets as the planned data store.
 
-## Get started
+## Current state
 
-1. Install dependencies
+The app currently displays a refreshable sample list. An experimental Google Sheets hook exists, but the screen does not use it yet; you cannot record or view expenses in the app.
 
+## Run locally
+
+1. Install dependencies:
    ```bash
-   npm install
+    npm install
+   ```
+2. Start Expo with the development build:
+   ```bash
+    npx expo start --dev-client
    ```
 
-2. Start the app
+The available scripts also include `npm run android`, `npm run ios`, `npm run web`, and `npm run lint`.
 
-   ```bash
-   npx expo start
-   ```
+## Development build with EAS
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+The development build includes native modules and runs the app through a development client rather than Expo Go. These packages are already in `package.json` and installed by `npm install`. To add or update them for the current Expo SDK, use:
 
 ```bash
-npm run reset-project
+npx expo install expo-dev-client expo-auth-session expo-web-browser expo-crypto expo-secure-store
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+`expo-dev-client` provides the development client. The other packages support Google sign-in and secure token storage in `src/hooks/useSheets.ts`.
 
-### Other setup steps
+[EAS Build](https://docs.expo.dev/build/introduction/) builds the native development client in the cloud. This repo already has an EAS project ID in `app.json` and a `development` profile in `eas.json` (`developmentClient: true`, `distribution: internal`), so you do not need to run `eas build:configure`.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+1. Install the EAS CLI globally (once):
+   ```bash
+   npm install --global eas-cli
+   ```
+2. Sign in to your Expo account:
+   ```bash
+   eas login
+   ```
+3. Build for the device you will use (choose one):
+   ```bash
+   eas build --profile development --platform android
+   eas build --profile development --platform ios
+   ```
 
-## Learn more
+    EAS may prompt for signing credentials. Building for a physical iOS device requires Apple Developer credentials. Install the resulting build using the link or QR code from EAS.
+4. Start Metro for the installed development build:
+   ```bash
+    npx expo start --dev-client
+   ```
 
-To learn more about developing your project with Expo, look at the following resources:
+Open the installed app and connect it to Metro. JavaScript changes reload without rebuilding; rebuild after adding or changing native dependencies or configuration. For a local native build instead of EAS, use `npm run android` or `npm run ios` with the corresponding native tooling installed.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Google Sheets integration (in progress)
 
-## Join the community
+`src/hooks/useSheets.ts` contains sign-in, add-expense, and list-expenses functions. The hook expects these environment variables when you work on the integration:
 
-Join our community of developers creating universal apps.
+- `EXPO_PUBLIC_SHEET_ID`: spreadsheet ID
+- `EXPO_PUBLIC_GOOGLE_ANDROID_ID`: Android OAuth client ID
+- `EXPO_PUBLIC_GOOGLE_IOS_ID`: iOS OAuth client ID
+- `EXPO_PUBLIC_GOOGLE_WEB_ID`: web OAuth client ID
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+It reads and appends rows in an `Expenses` sheet, with columns for timestamp, amount, category, and note (`A:D`). These functions are not connected to the current screen.
