@@ -1,17 +1,38 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Host, List, ListItem } from "@expo/ui";
+import { useState } from "react";
+import { Text } from "react-native";
+
+function ListRefreshExample() {
+  const [items, setItems] = useState([1, 2, 3]);
+
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setItems(prev => [Math.max(...prev) + 1, ...prev]);
+  }
+
+  return (
+    <Host style={{flex: 1, backgroundColor: "white"}}>
+      <List onRefresh={handleRefresh}>
+        {items.map(id => (
+          <ListItem key={id}>
+            <Text>{`Item ${id}`}</Text>
+          </ListItem>
+        ))}
+      </List>
+    </Host>
+  )
+}
 
 export default function Index() {
   return (
-    <View style={styles.container}>
-      <Text>Edit src/app/index.tsx to edit this screen.</Text>
-    </View>
+    <ListRefreshExample />
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+// });
