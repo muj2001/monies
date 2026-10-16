@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
 import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import * as SecureStore from 'expo-secure-store';
+import * as WebBrowser from 'expo-web-browser';
+import { useCallback, useEffect, useState } from 'react';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -50,14 +50,14 @@ export function useSheets() {
     return res.json();
   }, [token, signOut]);
 
-//   const addExpense = (amount: number, category: string, note: string) =>
-//     call(
-//       `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB}!A:D:append?valueInputOption=USER_ENTERED`,
-//       { method: 'POST', body: JSON.stringify({ values: [[new Date().toISOString(), amount, category, note]] }) }
-//     );
+  const addExpense = (amount: number, category: string, note: string) =>
+    call(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB}!A:D:append?valueInputOption=USER_ENTERED`,
+      { method: 'POST', body: JSON.stringify({ values: [[new Date().toISOString(), amount, category, note]] }) }
+    );
 
-//   const listExpenses = async () =>
-//     (await call(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB}!A:D`)).values ?? [];
+  const listExpenses = async () =>
+    (await call(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${TAB}!A:D`)).values ?? [];
 
-//   return { signedIn: !!token, signIn: () => promptAsync(), ready: !!request, signOut, addExpense, listExpenses };
-// }
+  return { signedIn: !!token, signIn: () => promptAsync(), ready: !!request, signOut, addExpense, listExpenses };
+}
