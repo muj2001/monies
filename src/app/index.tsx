@@ -1,4 +1,5 @@
 import { Host, List, ListItem } from "@expo/ui";
+import { Stack } from "expo-router";
 import { useState } from "react";
 import { Text } from "react-native";
 
@@ -25,7 +26,10 @@ function ListRefreshExample() {
 
 export default function Index() {
   return (
-    <ListRefreshExample />
+    <>
+      <Stack.Screen options={{ headerTitle: "Monies" }} />
+      <ListRefreshExample />
+    </>
   );
 }
 
