@@ -16,6 +16,8 @@ A personal ledger app built with Expo and React Native. This is a learning proje
 
 The app currently displays a refreshable sample list. An experimental Google Sheets hook exists, but the screen does not use it yet; you cannot record or view expenses in the app.
 
+Frontend workflow, design questions, and screen notes live in [DESIGN.md](DESIGN.md).
+
 ## Run locally
 
 1. Install dependencies:
@@ -72,4 +74,4 @@ Open the installed app and connect it to Metro. JavaScript changes reload withou
 - `EXPO_PUBLIC_GOOGLE_IOS_ID`: iOS OAuth client ID
 - `EXPO_PUBLIC_GOOGLE_WEB_ID`: web OAuth client ID
 
-It reads and appends rows in an `Expenses` sheet, with columns for timestamp, amount, category, and note (`A:D`). These functions are not connected to the current screen.
+This experimental hook reads and appends rows in an `Expenses` sheet, with columns for timestamp, amount, category, and note (`A:D`). These functions are not connected to the current screen and do not match the actual `transactions` and `categories` sheet schema described in [DESIGN.md](DESIGN.md); do not use the hook as the data-model reference.

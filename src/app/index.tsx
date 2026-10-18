@@ -16,7 +16,7 @@ function ListRefreshExample() {
       <List onRefresh={handleRefresh}>
         {items.map(id => (
           <ListItem key={id}>
-            <Text>{`Item ${id}`}</Text>
+            <Text>{`Expense ${id}`}</Text>
           </ListItem>
         ))}
       </List>
