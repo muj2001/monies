@@ -13,10 +13,12 @@ Make expenses easy to scan on Android first. Begin with sample data before conne
 - Display amounts in PKR and dates as `DD MMM YYYY` (for example, `18 Oct 2026`).
 - The source data comes from the real `transactions` sheet described in the [UI overview](../README.md), not the current `useSheets` hook.
 
-## To decide before implementing
+## First implementation
 
-- Which parts should use Expo UI components versus React Native components?
+- Static sample expenses exercise the date grouping and `created_at` ordering before Sheets integration.
+- Android uses `@expo/ui/jetpack-compose`: `Host` contains the native UI, `LazyColumn` scrolls, `Card` rounds and spaces rows, and `ListItem` shows expense details.
+- The floating `+` button is visual only until the add-expense screen exists.
 
 ## Device check
 
-Not yet implemented or tested on a device.
+The populated list and rounded cards rendered on Android. The floating button clears the system navigation bar. Verify the empty state on-device before connecting data.
