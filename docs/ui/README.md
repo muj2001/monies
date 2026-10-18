@@ -1,6 +1,10 @@
-# Frontend and design notes
+# UI documentation
 
-A working note for the mobile UI. Record decisions as we make them; keep untested ideas under open questions rather than treating them as requirements.
+A working home for frontend decisions. Keep screen-specific details in `screens/` and add shared-component notes only when we have reusable components to document.
+
+## Screens
+
+- [Expenses](screens/expenses.md)
 
 ## Working approach
 
@@ -16,6 +20,7 @@ A working note for the mobile UI. Record decisions as we make them; keep unteste
 - The home screen shows a refreshable sample list, not saved ledger entries.
 - `@expo/ui` is installed and used for the sample list. We have not yet decided where native Expo UI components fit best versus regular React Native components.
 - Google Sheets integration is experimental and not connected to the screen. The `useSheets` hook does not yet reflect the current spreadsheet schema and is not a source of truth for UI or data modeling; it will be updated later.
+- The current header and splash screen use different colors; no visual palette has been chosen.
 
 ## Spreadsheet data model
 
@@ -24,30 +29,13 @@ The actual Google Sheet is the source of truth for transaction and category fiel
 - `transactions`: `id`, `amount`, `description`, `category_id`, `category` (formula), `date`, `created_at`, `archived` (soft deletion).
 - `categories`: `id`, `title`, `description`.
 
-For display, `date` is distinct from `created_at`. The expense row shows the transaction's `category` value and `description`.
-- The current header and splash screen use different colors; no visual palette has been chosen.
+`date` is distinct from `created_at`. Screen-specific display and ordering decisions live in the linked screen notes.
 
-## First design slice: expenses screen
-
-**Goal:** Make expenses easy to scan on Android first. Begin with sample data before connecting Google Sheets.
-
-Decided:
-
-- Each row shows amount, category, description, and date.
-- Group rows by date; order expenses by `created_at`.
-
-To decide together before implementing:
-
-- Should date groups be newest first or oldest first? Within each date group, should `created_at` order be newest first or oldest first?
-- What should an empty ledger look like, and what is the primary action from that state?
-- Where should the action to add an expense live?
-
-## Decisions to make later
+## App-wide decisions to make later
 
 - iOS behavior and styling after the Android-first pass.
 - Visual direction: typography, colors, spacing, and use of platform-native styling.
 - Navigation beyond the first screen.
-- Amount and date formatting, including currency.
 
 ## Screen notes template
 
