@@ -18,9 +18,9 @@ A working home for frontend decisions. Keep screen-specific details in `screens/
 ## Current state
 
 - Expo Router navigates between Expenses and Add expense.
-- The list starts with sample transactions. New expenses save in app memory for the current session only.
+- Expenses and categories load from Google Sheets after Google sign-in; new expenses append to the `transactions` sheet.
 - Android uses `@expo/ui` for the list and date picker, with React Native form controls on Add expense.
-- Google Sheets integration is experimental and not connected to either screen. The `useSheets` hook does not yet reflect the current spreadsheet schema and is not a source of truth for UI or data modeling; it will be updated later.
+- `src/lib/sheets.ts` reads and writes the sheet by header name. The `category` formula column is never written by the app.
 - The current header and splash screen use different colors; no visual palette has been chosen.
 
 ## Spreadsheet data model

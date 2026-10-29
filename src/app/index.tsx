@@ -1,4 +1,15 @@
-import { Box, Card, FloatingActionButton, Host, LazyColumn, ListItem, Text } from "@expo/ui/jetpack-compose";
+import {
+  Box,
+  Button,
+  Card,
+  CircularProgressIndicator,
+  Column,
+  FloatingActionButton,
+  Host,
+  LazyColumn,
+  ListItem,
+  Text,
+} from "@expo/ui/jetpack-compose";
 import { align, fillMaxSize, fillMaxWidth, offset, padding } from "@expo/ui/jetpack-compose/modifiers";
 import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,7 +19,7 @@ const amountFormat = new Intl.NumberFormat("en-PK");
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function Index() {
-  const { expenses } = useExpenses();
+  const { status, error, expenses, signIn, reload } = useExpenses();
   const sortedExpenses = [...expenses.filter(expense => !expense.archived)].sort(
     (a, b) => b.date.localeCompare(a.date) || Date.parse(b.created_at) - Date.parse(a.created_at)
   );
@@ -28,7 +39,23 @@ export default function Index() {
       <SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
         <Host style={{ flex: 1 }}>
           <Box modifiers={[fillMaxSize()]}>
-            {groups.length === 0 ? (
+            {status !== "ready" ? (
+              <Box modifiers={[fillMaxSize(), padding(24, 0, 24, 0)]} contentAlignment="center">
+                <Column verticalArrangement={{ spacedBy: 16 }} horizontalAlignment="center">
+                  {status === "checking" || status === "loading" ? <CircularProgressIndicator /> : null}
+                  {status === "signedOut" ? (
+                    <>
+                      <Text>Sign in to load your ledger from Google Sheets.</Text>
+                      <Button onClick={signIn}><Text>Sign in with Google</Text></Button>
+                    </>
+                  ) : null}
+                  {status === "error" ? (
+                    <Button onClick={reload}><Text>Try again</Text></Button>
+                  ) : null}
+                  {error ? <Text color="#b00020">{error}</Text> : null}
+                </Column>
+              </Box>
+            ) : groups.length === 0 ? (
               <Box modifiers={[fillMaxSize()]} contentAlignment="center">
                 <Text>No expenses yet.</Text>
               </Box>
@@ -52,9 +79,11 @@ export default function Index() {
                 ])}
               </LazyColumn>
             )}
-            <FloatingActionButton modifiers={[align("bottomEnd"), offset(-16, -16)]} onClick={() => router.push("/add-expense")}>
-              <FloatingActionButton.Icon><Text style={{ fontSize: 28 }}>+</Text></FloatingActionButton.Icon>
-            </FloatingActionButton>
+            {status === "ready" ? (
+              <FloatingActionButton modifiers={[align("bottomEnd"), offset(-16, -16)]} onClick={() => router.push("/add-expense")}>
+                <FloatingActionButton.Icon><Text style={{ fontSize: 28 }}>+</Text></FloatingActionButton.Icon>
+              </FloatingActionButton>
+            ) : null}
           </Box>
         </Host>
       </SafeAreaView>

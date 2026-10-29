@@ -1,54 +1,90 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { randomUUID } from "expo-crypto";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  appendExpense,
+  loadLedger,
+  restoreSignIn,
+  signIn as googleSignIn,
+  type Category,
+  type Expense,
+  type NewExpense,
+} from "../lib/sheets";
 
-export type Expense = {
-  id: string;
-  amount: number;
-  description: string;
-  category_id: string;
-  category: string;
-  date: string;
-  created_at: string;
-  archived: boolean;
-};
+export type { Category, Expense } from "../lib/sheets";
 
-export const sampleCategories = [
-  { id: "groceries", title: "Groceries" },
-  { id: "transport", title: "Transport" },
-  { id: "food", title: "Food" },
-];
+type Status = "checking" | "signedOut" | "loading" | "ready" | "error";
 
-const sampleExpenses: Expense[] = [
-  { id: "1", amount: 1250, description: "Milk and bread", category_id: "groceries", category: "Groceries", date: "2026-10-18", created_at: "2026-10-18T12:30:00", archived: false },
-  { id: "2", amount: 500, description: "Ride home", category_id: "transport", category: "Transport", date: "2026-10-18", created_at: "2026-10-18T09:15:00", archived: false },
-  { id: "3", amount: 2400, description: "Dinner", category_id: "food", category: "Food", date: "2026-10-17", created_at: "2026-10-17T20:00:00", archived: false },
-];
-
-type NewExpense = Pick<Expense, "amount" | "description" | "category_id" | "date">;
 type ExpensesContextValue = {
+  status: Status;
+  error: string | null;
+  categories: Category[];
   expenses: Expense[];
-  addExpense: (expense: NewExpense) => void;
+  signIn: () => Promise<void>;
+  reload: () => Promise<void>;
+  addExpense: (expense: NewExpense) => Promise<void>;
 };
 
 const ExpensesContext = createContext<ExpensesContextValue | null>(null);
 
-export function ExpensesProvider({ children }: { children: ReactNode }) {
-  const [expenses, setExpenses] = useState(sampleExpenses);
+function message(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
 
-  const addExpense = (expense: NewExpense) => {
-    const category = sampleCategories.find(item => item.id === expense.category_id)!;
-    setExpenses(current => [
-      {
-        ...expense,
-        id: `${Date.now()}-${current.length}`,
-        category: category.title,
-        created_at: new Date().toISOString(),
-        archived: false,
-      },
-      ...current,
-    ]);
+export function ExpensesProvider({ children }: { children: ReactNode }) {
+  const [status, setStatus] = useState<Status>("checking");
+  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [transactionColumns, setTransactionColumns] = useState<string[]>([]);
+
+  const reload = async () => {
+    setStatus("loading");
+    setError(null);
+    try {
+      const ledger = await loadLedger();
+      setCategories(ledger.categories);
+      setExpenses(ledger.expenses);
+      setTransactionColumns(ledger.transactionColumns);
+      setStatus("ready");
+    } catch (e) {
+      setError(message(e));
+      setStatus("error");
+    }
   };
 
-  return <ExpensesContext.Provider value={{ expenses, addExpense }}>{children}</ExpensesContext.Provider>;
+  const signIn = async () => {
+    setError(null);
+    try {
+      if (await googleSignIn()) await reload();
+    } catch (e) {
+      setError(message(e));
+      setStatus("signedOut");
+    }
+  };
+
+  useEffect(() => {
+    restoreSignIn()
+      .then(signedIn => (signedIn ? reload() : setStatus("signedOut")))
+      .catch(e => {
+        setError(message(e));
+        setStatus("signedOut");
+      });
+    // Runs once on launch to restore the previous Google session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const addExpense = async (expense: NewExpense) => {
+    const id = randomUUID();
+    const created_at = await appendExpense(transactionColumns, { ...expense, id });
+    const category = categories.find(item => item.id === expense.category_id)?.title ?? "Uncategorized";
+    setExpenses(current => [{ ...expense, id, category, created_at, archived: false }, ...current]);
+  };
+
+  return (
+    <ExpensesContext.Provider value={{ status, error, categories, expenses, signIn, reload, addExpense }}>
+      {children}
+    </ExpensesContext.Provider>
+  );
 }
 
 export function useExpenses() {
