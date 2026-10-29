@@ -15,9 +15,9 @@ Make expenses easy to scan on Android first. Begin with sample data before conne
 
 ## First implementation
 
-- Static sample expenses exercise the date grouping and `created_at` ordering before Sheets integration.
+- Sample expenses and new session-only entries exercise the date grouping and `created_at` ordering before Sheets integration.
 - Android uses `@expo/ui/jetpack-compose`: `Host` contains the native UI, `LazyColumn` scrolls, `Card` rounds and spaces rows, and `ListItem` shows expense details.
-- The floating `+` button is visual only until the add-expense screen exists.
+- The floating `+` button opens Add expense.
 
 ## Device check
 

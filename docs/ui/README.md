@@ -5,6 +5,7 @@ A working home for frontend decisions. Keep screen-specific details in `screens/
 ## Screens
 
 - [Expenses](screens/expenses.md)
+- [Add expense](screens/add-expense.md)
 
 ## Working approach
 
@@ -16,10 +17,10 @@ A working home for frontend decisions. Keep screen-specific details in `screens/
 
 ## Current state
 
-- Expo Router provides navigation; the app currently has a single home screen.
-- The home screen shows a refreshable sample list, not saved ledger entries.
-- `@expo/ui` is installed and used for the sample list. We have not yet decided where native Expo UI components fit best versus regular React Native components.
-- Google Sheets integration is experimental and not connected to the screen. The `useSheets` hook does not yet reflect the current spreadsheet schema and is not a source of truth for UI or data modeling; it will be updated later.
+- Expo Router navigates between Expenses and Add expense.
+- The list starts with sample transactions. New expenses save in app memory for the current session only.
+- Android uses `@expo/ui` for the list and date picker, with React Native form controls on Add expense.
+- Google Sheets integration is experimental and not connected to either screen. The `useSheets` hook does not yet reflect the current spreadsheet schema and is not a source of truth for UI or data modeling; it will be updated later.
 - The current header and splash screen use different colors; no visual palette has been chosen.
 
 ## Spreadsheet data model

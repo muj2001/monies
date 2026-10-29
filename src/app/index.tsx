@@ -1,41 +1,27 @@
 import { Box, Card, FloatingActionButton, Host, LazyColumn, ListItem, Text } from "@expo/ui/jetpack-compose";
 import { align, fillMaxSize, fillMaxWidth, offset, padding } from "@expo/ui/jetpack-compose/modifiers";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-type Expense = {
-  id: string;
-  amount: number;
-  category: string;
-  description: string;
-  date: string;
-  created_at: string;
-};
-
-const sampleExpenses: Expense[] = [
-  { id: "1", amount: 1250, category: "Groceries", description: "Milk and bread", date: "2026-10-18", created_at: "2026-10-18T12:30:00" },
-  { id: "2", amount: 500, category: "Transport", description: "Ride home", date: "2026-10-18", created_at: "2026-10-18T09:15:00" },
-  { id: "3", amount: 2400, category: "Food", description: "Dinner", date: "2026-10-17", created_at: "2026-10-17T20:00:00" },
-];
-
-const sortedExpenses = [...sampleExpenses].sort(
-  (a, b) => b.date.localeCompare(a.date) || b.created_at.localeCompare(a.created_at)
-);
-
-const groups: { date: string; expenses: Expense[] }[] = [];
-for (const expense of sortedExpenses) {
-  const lastGroup = groups[groups.length - 1];
-  if (lastGroup?.date === expense.date) {
-    lastGroup.expenses.push(expense);
-  } else {
-    groups.push({ date: expense.date, expenses: [expense] });
-  }
-}
+import { useExpenses, type Expense } from "../hooks/useExpenses";
 
 const amountFormat = new Intl.NumberFormat("en-PK");
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
 export default function Index() {
+  const { expenses } = useExpenses();
+  const sortedExpenses = [...expenses.filter(expense => !expense.archived)].sort(
+    (a, b) => b.date.localeCompare(a.date) || Date.parse(b.created_at) - Date.parse(a.created_at)
+  );
+  const groups: { date: string; expenses: Expense[] }[] = [];
+  for (const expense of sortedExpenses) {
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup?.date === expense.date) {
+      lastGroup.expenses.push(expense);
+    } else {
+      groups.push({ date: expense.date, expenses: [expense] });
+    }
+  }
+
   return (
     <>
       <Stack.Screen options={{ headerTitle: "Monies" }} />
@@ -56,15 +42,17 @@ export default function Index() {
                     <Card key={expense.id} colors={{ containerColor: "#fff" }} modifiers={[padding(16, 0, 16, 12), fillMaxWidth()]}>
                       <ListItem colors={{ containerColor: "#fff" }}>
                         <ListItem.HeadlineContent><Text>{expense.category}</Text></ListItem.HeadlineContent>
-                        <ListItem.SupportingContent><Text>{expense.description}</Text></ListItem.SupportingContent>
-                        <ListItem.TrailingContent><Text>PKR {amountFormat.format(expense.amount)}</Text></ListItem.TrailingContent>
+                        {expense.description ? (
+                          <ListItem.SupportingContent><Text style={{ fontSize: 12, fontWeight: "300" }}>{expense.description}</Text></ListItem.SupportingContent>
+                        ) : null}
+                        <ListItem.TrailingContent><Text style={{ fontSize: 20 }}>PKR {amountFormat.format(expense.amount)}</Text></ListItem.TrailingContent>
                       </ListItem>
                     </Card>
                   )),
                 ])}
               </LazyColumn>
             )}
-            <FloatingActionButton modifiers={[align("bottomEnd"), offset(-16, -16)]}>
+            <FloatingActionButton modifiers={[align("bottomEnd"), offset(-16, -16)]} onClick={() => router.push("/add-expense")}>
               <FloatingActionButton.Icon><Text style={{ fontSize: 28 }}>+</Text></FloatingActionButton.Icon>
             </FloatingActionButton>
           </Box>
@@ -73,11 +61,3 @@ export default function Index() {
     </>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });

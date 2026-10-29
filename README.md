@@ -14,7 +14,7 @@ A personal ledger app built with Expo and React Native. This is a learning proje
 
 ## Current state
 
-The app currently displays a refreshable sample list. An experimental Google Sheets hook exists, but the screen does not use it yet; you cannot record or view expenses in the app.
+The app displays sample expenses and lets you add expenses in memory until it restarts. Google Sheets is not connected to the screens yet; the experimental hook still needs updating to match the actual sheet schema.
 
 Frontend workflow, design questions, and screen notes live in [UI documentation](docs/ui/README.md).
 
