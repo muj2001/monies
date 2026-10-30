@@ -14,7 +14,7 @@ A personal ledger app built with Expo and React Native. This is a learning proje
 
 ## Current state
 
-The app displays sample expenses and lets you add expenses in memory until it restarts. Google Sheets is not connected to the screens yet; the experimental hook still needs updating to match the actual sheet schema.
+The app signs in with Google, loads expenses and categories from Google Sheets, and appends new expenses to the sheet. Android is the only platform set up so far.
 
 Frontend workflow, design questions, and screen notes live in [UI documentation](docs/ui/README.md).
 
@@ -36,10 +36,10 @@ The available scripts also include `npm run start`, `npm run android`, `npm run 
 The development build includes native modules and runs the app through a development client rather than Expo Go. These packages are already in `package.json` and installed by `npm install`. To add or update them for the current Expo SDK, use:
 
 ```bash
-npx expo install expo-dev-client expo-auth-session expo-web-browser expo-crypto expo-secure-store
+npx expo install expo-dev-client @react-native-google-signin/google-signin expo-crypto
 ```
 
-`expo-dev-client` provides the development client. The other packages support Google sign-in and secure token storage in `src/hooks/useSheets.ts`.
+`expo-dev-client` provides the development client. `@react-native-google-signin/google-signin` handles Google sign-in and access tokens, and `expo-crypto` generates transaction IDs.
 
 [EAS Build](https://docs.expo.dev/build/introduction/) builds the native development client in the cloud. This repo already has an EAS project ID in `app.json` and a `development` profile in `eas.json` (`developmentClient: true`, `distribution: internal`), so you do not need to run `eas build:configure`.
 
@@ -65,13 +65,31 @@ npx expo install expo-dev-client expo-auth-session expo-web-browser expo-crypto 
 
 Open the installed app and connect it to Metro. JavaScript changes reload without rebuilding; rebuild after adding or changing native dependencies or configuration. For a local native build instead of EAS, use `npm run android` or `npm run ios` with the corresponding native tooling installed.
 
-## Google Sheets integration (in progress)
+## Google Sheets integration
 
-`src/hooks/useSheets.ts` contains sign-in, add-expense, and list-expenses functions. The hook expects these environment variables when you work on the integration:
+`src/lib/sheets.ts` signs in with Google, reads the `categories` and `transactions` tabs, and appends rows to `transactions`. It matches columns by the header row, so column order in the sheet does not matter. The data model is described in [UI documentation](docs/ui/README.md).
 
-- `EXPO_PUBLIC_SHEET_ID`: spreadsheet ID
-- `EXPO_PUBLIC_GOOGLE_ANDROID_ID`: Android OAuth client ID
-- `EXPO_PUBLIC_GOOGLE_IOS_ID`: iOS OAuth client ID
-- `EXPO_PUBLIC_GOOGLE_WEB_ID`: web OAuth client ID
+### Google Cloud setup (Android)
 
-This experimental hook reads and appends rows in an `Expenses` sheet, with columns for timestamp, amount, category, and note (`A:D`). These functions are not connected to the current screen and do not yet match the actual `transactions` and `categories` sheet schema described in [UI documentation](docs/ui/README.md). The hook will be updated later; until then, do not use it as the data-model reference.
+1. In a Google Cloud project, enable the **Google Sheets API**.
+2. Configure the **OAuth consent screen** in Testing mode and add your Google account as a test user.
+3. Create an **Android** OAuth client with package `com.mujnuu.ledger` and the SHA-1 of the signing key for the build you install. Get the debug key's SHA-1 with `cd android && ./gradlew signingReport`. EAS builds use a different key, so add that SHA-1 as a separate Android client.
+4. Optionally create a **Web** OAuth client. Its ID is only needed for ID tokens.
+
+### Environment variables
+
+Put these in `.env.local`, which git ignores:
+
+- `EXPO_PUBLIC_SHEET_ID`: spreadsheet ID from the sheet URL
+- `EXPO_PUBLIC_GOOGLE_WEB_ID`: web OAuth client ID (optional)
+
+### Rebuild after native changes
+
+The sign-in library adds native code, so rebuild the development client after installing it or changing its config:
+
+```bash
+npx expo prebuild --clean
+npx expo run:android
+```
+
+The `iosUrlScheme` in `app.json` is a placeholder; replace it with the reversed iOS client ID before building for iOS.

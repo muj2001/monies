@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Create a transaction and show it in the Expenses list. This first pass saves only in app memory; entries added during a session disappear when the app restarts.
+Create a transaction, append it to the `transactions` sheet, and show it in the Expenses list.
 
 ## Fields and actions
 
 - Amount in PKR, greater than zero with up to two decimal places. The field accepts digits and at most one period; it rejects further input past two decimal places.
-- Category selected from temporary sample categories; save its `category_id` and display title.
+- Category selected from the `categories` sheet; save its `category_id`.
 - Optional description.
 - Expense date defaults to today and opens an Android date picker. Store it separately from `created_at`.
-- Save validates amount and category, adds the expense to the session list, then returns to Expenses.
+- Save validates amount and category, appends the row to Google Sheets, then returns to Expenses. While saving, the button is disabled; a failed save keeps the form and shows the error.
 
 ## Component choices
 

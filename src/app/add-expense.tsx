@@ -3,7 +3,7 @@ import { Stack, router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { sampleCategories, useExpenses } from "../hooks/useExpenses";
+import { useExpenses } from "../hooks/useExpenses";
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
@@ -15,7 +15,8 @@ function sheetDate(date: Date) {
 }
 
 export default function AddExpense() {
-  const { addExpense } = useExpenses();
+  const { categories, addExpense } = useExpenses();
+  const [saving, setSaving] = useState(false);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -23,7 +24,7 @@ export default function AddExpense() {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const save = () => {
+  const save = async () => {
     const enteredAmount = amount.trim();
     const numericAmount = Number(enteredAmount);
     if (!/^\d+(\.\d{1,2})?$/.test(enteredAmount) || !Number.isFinite(numericAmount) || numericAmount <= 0) {
@@ -35,13 +36,20 @@ export default function AddExpense() {
       return;
     }
 
-    addExpense({
-      amount: numericAmount,
-      description: description.trim(),
-      category_id: categoryId,
-      date: sheetDate(date),
-    });
-    router.back();
+    setSaving(true);
+    setError(null);
+    try {
+      await addExpense({
+        amount: numericAmount,
+        description: description.trim(),
+        category_id: categoryId,
+        date: sheetDate(date),
+      });
+      router.back();
+    } catch (e) {
+      setError(`Could not save to Google Sheets. ${e instanceof Error ? e.message : String(e)}`);
+      setSaving(false);
+    }
   };
 
   return (
@@ -69,7 +77,8 @@ export default function AddExpense() {
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Category</Text>
             <View style={styles.categories}>
-              {sampleCategories.map(category => (
+              {categories.length === 0 ? <Text style={styles.error}>No categories found in the sheet.</Text> : null}
+              {categories.map(category => (
                 <Pressable
                   key={category.id}
                   accessibilityRole="radio"
@@ -104,8 +113,13 @@ export default function AddExpense() {
 
           {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
 
-          <Pressable accessibilityRole="button" onPress={save} style={({ pressed }) => [styles.save, pressed && styles.pressed]}>
-            <Text style={styles.saveText}>Save expense</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: saving, busy: saving }}
+            disabled={saving}
+            onPress={save}
+            style={({ pressed }) => [styles.save, (pressed || saving) && styles.pressed]}>
+            <Text style={styles.saveText}>{saving ? "Saving…" : "Save expense"}</Text>
           </Pressable>
         </ScrollView>
         {datePickerOpen ? (
