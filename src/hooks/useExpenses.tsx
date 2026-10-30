@@ -70,7 +70,6 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
         setStatus("signedOut");
       });
     // Runs once on launch to restore the previous Google session.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addExpense = async (expense: NewExpense) => {

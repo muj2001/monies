@@ -10,7 +10,9 @@ A personal ledger app built with Expo and React Native. This is a learning proje
 | Expo | Develop and build the app | App platform and tooling | In use | — |
 | Expo Router | Navigate between screens | Navigation | In use | — |
 | TypeScript | Check types during development | Programming language | In use | — |
-| Google Sheets | Store expense records | Data store | Integration in progress | — |
+| Google Sheets | Store expense records | Data store | In use (Android) | — |
+| Google Sign-In (`@react-native-google-signin/google-signin`) | Sign in and get Google Sheets access | Authentication | In use (Android) | `expo-auth-session` |
+| ESLint (`eslint-config-expo`) | Catch code issues | Linting | In use | — |
 
 ## Current state
 
@@ -93,3 +95,25 @@ npx expo run:android
 ```
 
 The `iosUrlScheme` in `app.json` is a placeholder; replace it with the reversed iOS client ID before building for iOS.
+
+### Troubleshooting
+
+**`INSTALL_FAILED_UPDATE_INCOMPATIBLE` when installing a build**
+
+The installed app was signed with a different key, for example an EAS build replaced by a local build. Android does not replace an app signed with another key. Uninstall it first, which also deletes the app's data on the device:
+
+```bash
+adb uninstall com.mujnuu.ledger
+```
+
+**`DEVELOPER_ERROR` when signing in**
+
+No Android OAuth client matches the installed app's package name and signing SHA-1. Check that a client exists for `com.mujnuu.ledger` with the SHA-1 of the build you installed, and that it is in the same Cloud project as the Sheets API. New clients can take a few minutes to take effect. To print the SHA-1 an APK is signed with:
+
+```bash
+"$ANDROID_HOME"/build-tools/<version>/apksigner verify --print-certs android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Google blocks sign-in for your account**
+
+While the consent screen is in Testing mode, only listed test users can sign in. Add your account under **Google Auth Platform → Audience → Test users**. Testing-mode access also expires after 7 days, so you may need to sign in again.
